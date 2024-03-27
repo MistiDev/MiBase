@@ -37,13 +37,19 @@ function insert(key, value, table) {
         return
     }
 
-    let data = {};
-    let filePath = path + '/' + table + '/' + table + '.sql';
-
-    if (!tables.includes(table)) {
-            let tableToWrite = tables[0];
-            filePath = path + '/' + `${tableToWrite}/` + `${tableToWrite}.sql`;
+    if (typeof table === 'undefined') {
+        let tableToWrite = tables[0];
+        filePath = path + '/' + `${tableToWrite}/` + `${tableToWrite}.sql`;
+    } else {
+        if (tables.indexOf(table)!==-1) {
+        filePath = path + '/' + table + '/' + table + '.sql';
+        } else {
+        console.log(`Таблица ${table} не найдена!`);
+        return
+        }
     }
+
+    let data = {};
 
     if (fs.existsSync(filePath)) {
         const jsonData = fs.readFileSync(filePath);
