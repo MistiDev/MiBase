@@ -3,7 +3,7 @@ const fs = require('file-system');
 let connected = false;
 
 if (!fs.existsSync("mibase-config.json")) {
-    fs.writeFileSync('./mibase-config.json', '{"path":"./MiBase", "tables":["main"]}');
+    fs.writeFileSync('./mibase-config.json', '{"path": "./MiBase","tables": ["main"]}');
 }
 
 const configData = JSON.parse(fs.readFileSync('mibase-config.json'));
@@ -79,92 +79,76 @@ function select(key, table) {
     return value;
 };
 
-function remove(key) {
+function remove(key, table) {
     if(!connected) {
         console.log("MiBase не подключена!")
         return
     }
 
-    data = {}
+    data = {};
+    let filePath = path + '/' + table + '/' + table + '.sql';
 
-    if (fs.existsSync('./MiBase/main.sql')) {
-        const jsonData = fs.readFileSync('./MiBase/main.sql');
+    if (!tables.includes(table)) {
+        let tableToWrite = tables[0];
+        filePath = path + '/' + `${tableToWrite}/` + `${tableToWrite}.sql`;
+    }
+
+    if (fs.existsSync(filePath)) {
+        const jsonData = fs.readFileSync(filePath);
         data = JSON.parse(jsonData);
     }
 
     if(data.hasOwnProperty(key)) {
         delete data[key]
 
-        fs.writeFileSync('./MiBase/main.sql', JSON.stringify(data));
+        fs.writeFileSync(filePath, JSON.stringify(data));
     }
 }
 
-function clearData() {
+function clearData(table) {
     if(!connected) {
         console.log("MiBase не подключена!")
         return
     }
 
-    data = {}
+    data = {};
+    let filePath = path + '/' + table + '/' + table + '.sql';
 
-    fs.writeFileSync('./MiBase/main.sql', JSON.stringify(data))
+    if (!tables.includes(table)) {
+        let tableToWrite = tables[0];
+        filePath = path + '/' + `${tableToWrite}/` + `${tableToWrite}.sql`;
+    }
+
+    fs.writeFileSync(filePath, JSON.stringify(data))
 }
 
-function search(value) {
+function search(value, table) {
     if(!connected) {
         console.log("MiBase не подключена!")
         return
     }
 
-    if (fs.existsSync('./MiBase/main.sql')) {
-        const jsonData = fs.readFileSync('./MiBase/main.sql');
+    let filePath = path + '/' + table + '/' + table + '.sql';
+
+    if (!tables.includes(table)) {
+        let tableToRead = tables[0];
+        filePath = path + '/' + `${tableToRead}/` + `${tableToRead}.sql`;
+    }
+
+    if (fs.existsSync(filePath)) {
+        const jsonData = fs.readFileSync(filePath);
         data = JSON.parse(jsonData);
     }
 
     let result;
     for (let key in data) {
         if (data[key].includes(value)) {
-            results = key
+            result = key
         }
     }
 
+    console.log(result)
     return result
 }
 
-function backup() {
-    if(!connected) {
-        console.log("MiBase не подключена!")
-        return
-    }
-
-    if (fs.existsSync('./MiBase/main.sql')) {
-        const jsonData = fs.readFileSync('./MiBase/main.sql');
-        data = JSON.parse(jsonData);
-    }
-
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-
-    fs.writeFileSync(`./MiBase/backups/backup.sql`, JSON.stringify(data));
-}
-
-function restore() {
-    if(!connected) {
-        console.log("MiBase не подключена!")
-        return
-    }
-
-    if (fs.existsSync('./MiBase/backups/backup.sql')) {
-        const jsonData = fs.readFileSync('./MiBase/backups/backup.sql');
-        data = JSON.parse(jsonData);
-    }
-
-    fs.writeFileSync(`./MiBase/main.sql`, JSON.stringify(data));
-}
-
-module.exports = { connect, insert, select, remove, clearData, search, backup, restore };
+module.exports = { connect, insert, select, remove, clearData, search };
