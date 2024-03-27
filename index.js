@@ -50,7 +50,7 @@ function insert(key, value, table) {
         data = JSON.parse(jsonData);
     }
 
-    data[key] = value;
+    data[key] = value.toString();
     
     fs.writeFileSync(filePath, JSON.stringify(data));
 };
