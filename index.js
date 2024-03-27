@@ -131,8 +131,8 @@ function restore() {
         return
     }
 
-    if (fs.existsSync('./MiBase/backup.sql')) {
-        const jsonData = fs.readFileSync('./MiBase/backup.sql');
+    if (fs.existsSync('./MiBase/backups/backup.sql')) {
+        const jsonData = fs.readFileSync('./MiBase/backups/backup.sql');
         data = JSON.parse(jsonData);
     }
 
