@@ -7,6 +7,7 @@
     "license": "ISC",
     "description": "",
     "dependencies": {
-        "file-system": "^2.2.2"
+        "file-system": "^2.2.2",
+        "mibase": "github:MistiDev/MiBase"
     }
 }

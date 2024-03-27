@@ -1,13 +1,16 @@
 const fs = require('file-system');
-const folderPath = './MiBase';
 
 let connected = false;
 
-function connect() {
-    if (!fs.existsSync(folderPath)) {
-        fs.mkdirSync(folderPath);
-        fs.mkdirSync(folderPath + '/backups');
-        fs.writeFileSync('./MiBase/main.sql', '{}')
+function connect(database) {
+    tables = database.tables
+    path = database.path
+    if (!fs.existsSync(path)) {
+        fs.mkdirSync(path);
+        tables.forEach(name => {
+            fs.mkdirSync(path + '/' + name, { recursive: true })
+            fs.writeFileSync(`${path}/${name}/${name}.sql`, '{}');
+        });
         console.log('MiBase подключена!');
         connected = true;
     } else {
@@ -139,4 +142,4 @@ function restore() {
     fs.writeFileSync(`./MiBase/main.sql`, JSON.stringify(data));
 }
 
-module.exports = { connect, insert, select, remove, clearData, search, backup, restore};
+module.exports = { connect, insert, select, remove, clearData, search, backup, restore };
