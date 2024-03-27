@@ -2,18 +2,15 @@ const fs = require('file-system');
 
 let connected = false;
 
+if (!fs.existsSync("mibase-config.json")) {
+    fs.writeFileSync('./mibase-config.json', '{"path":"./MiBase", "tables":["main"]}');
+}
+
 const configData = JSON.parse(fs.readFileSync('mibase-config.json'));
 const path = configData.path;
 const tables = configData.tables;
 
 function connect() {
-    if (!fs.existsSync("mibase-config.json")) {
-        fs.writeFileSync('./mibase-config.json', '{"path":"./MiBase", "tables":["main"]}');
-        let path = "./MiBase"
-        let tables = ["main"]
-    }
-
-
     if (!fs.existsSync(path)) {
         fs.mkdirSync(path);
         tables.forEach(name => {
@@ -24,8 +21,10 @@ function connect() {
         connected = true;
     } else {
         tables.forEach(name => {
+            if (!fs.existsSync(path + '/' + name)) {
             fs.mkdirSync(path + '/' + name, { recursive: true })
             fs.writeFileSync(`${path}/${name}/${name}.sql`, '{}');
+            }
         });
         console.log("MiBase подключена!");
         connected = true;
@@ -39,9 +38,9 @@ function insert(key, value, table) {
     }
 
     let data = {};
-    let filePath = path + '/' + table;
+    let filePath = path + '/' + table + '/' + table + '.sql';
 
-    if (table) {
+    if (!tables.includes(table)) {
             let tableToWrite = tables[0];
             filePath = path + '/' + `${tableToWrite}/` + `${tableToWrite}.sql`;
     }
