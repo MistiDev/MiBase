@@ -157,4 +157,14 @@ function search(value, table) {
     return result
 }
 
-module.exports = { connect, insert, select, remove, clearData, search };
+function close() {
+    if(!connected) {
+        console.log("MiBase не подключена!")
+        return
+    }
+
+    console.log("MiBase отключена!");
+    connected = false;
+}
+
+module.exports = { connect, insert, select, remove, clearData, search, close };
