@@ -136,7 +136,7 @@ function restore() {
         data = JSON.parse(jsonData);
     }
 
-    fs.writeFileSync(`./MiBase/backups/main.sql`, JSON.stringify(data));
+    fs.writeFileSync(`./MiBase/main.sql`, JSON.stringify(data));
 }
 
 module.exports = { connect, insert, select, remove, clearData, search, backup, restore};
