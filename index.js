@@ -122,7 +122,21 @@ function backup() {
     const minutes = String(now.getMinutes()).padStart(2, '0');
     const seconds = String(now.getSeconds()).padStart(2, '0');
 
-    fs.writeFileSync(`./MiBase/backups/backup-${year}-${month}-${day}-${hours}-${minutes}-${seconds}.sql`, JSON.stringify(data));
+    fs.writeFileSync(`./MiBase/backups/backup.sql`, JSON.stringify(data));
 }
 
-module.exports = { connect, insert, select, remove, clearData, search, backup};
+function restore() {
+    if(!connected) {
+        console.log("MiBase не подключена!")
+        return
+    }
+
+    if (fs.existsSync('./MiBase/backup.sql')) {
+        const jsonData = fs.readFileSync('./MiBase/backup.sql');
+        data = JSON.parse(jsonData);
+    }
+
+    fs.writeFileSync(`./MiBase/backups/main.sql`, JSON.stringify(data));
+}
+
+module.exports = { connect, insert, select, remove, clearData, search, backup, restore};
