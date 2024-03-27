@@ -55,16 +55,22 @@ function insert(key, value, table) {
     fs.writeFileSync(filePath, JSON.stringify(data));
 };
 
-function select(key) {
+function select(key, table) {
     if(!connected) {
         console.log("MiBase не подключена!")
         return
     }
 
-    data = {}
+    data = {};
+    let filePath = path + '/' + table + '/' + table + '.sql';
 
-    if (fs.existsSync('./MiBase/main.sql')) {
-        const jsonData = fs.readFileSync('./MiBase/main.sql');
+    if (!tables.includes(table)) {
+        let tableToRead = tables[0];
+        filePath = path + '/' + `${tableToRead}/` + `${tableToRead}.sql`;
+    }
+
+    if (fs.existsSync(filePath)) {
+        const jsonData = fs.readFileSync(filePath);
         data = JSON.parse(jsonData);
     }
     
