@@ -97,13 +97,19 @@ function remove(key, table) {
         return
     }
 
-    data = {};
-    let filePath = path + '/' + table + '/' + table + '.sql';
-
-    if (!tables.includes(table)) {
+    if (typeof table === 'undefined') {
         let tableToWrite = tables[0];
         filePath = path + '/' + `${tableToWrite}/` + `${tableToWrite}.sql`;
+    } else {
+        if (tables.indexOf(table)!==-1) {
+        filePath = path + '/' + table + '/' + table + '.sql';
+        } else {
+        console.log(`Таблица ${table} не найдена!`);
+        return
+        }
     }
+
+    data = {};
 
     if (fs.existsSync(filePath)) {
         const jsonData = fs.readFileSync(filePath);
@@ -123,13 +129,19 @@ function clearData(table) {
         return
     }
 
-    data = {};
-    let filePath = path + '/' + table + '/' + table + '.sql';
-
-    if (!tables.includes(table)) {
+    if (typeof table === 'undefined') {
         let tableToWrite = tables[0];
         filePath = path + '/' + `${tableToWrite}/` + `${tableToWrite}.sql`;
+    } else {
+        if (tables.indexOf(table)!==-1) {
+        filePath = path + '/' + table + '/' + table + '.sql';
+        } else {
+        console.log(`Таблица ${table} не найдена!`);
+        return
+        }
     }
+
+    data = {};
 
     fs.writeFileSync(filePath, JSON.stringify(data))
 }
@@ -140,11 +152,16 @@ function search(value, table) {
         return
     }
 
-    let filePath = path + '/' + table + '/' + table + '.sql';
-
-    if (!tables.includes(table)) {
+    if (typeof table === 'undefined') {
         let tableToRead = tables[0];
         filePath = path + '/' + `${tableToRead}/` + `${tableToRead}.sql`;
+    } else {
+        if (tables.indexOf(table)!==-1) {
+        filePath = path + '/' + table + '/' + table + '.sql';
+        } else {
+        console.log(`Таблица ${table} не найдена!`);
+        return
+        }
     }
 
     if (fs.existsSync(filePath)) {
