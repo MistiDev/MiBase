@@ -1,0 +1,12 @@
+{
+    "name": "mibase",
+    "version": "1.0.0",
+    "main": "index.js",
+    "author": "Mist?",
+    "repository": "https://github.com/MistiDev/MiBase",
+    "license": "ISC",
+    "description": "",
+    "dependencies": {
+        "file-system": "^2.2.2"
+    }
+}
