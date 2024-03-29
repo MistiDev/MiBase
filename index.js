@@ -58,7 +58,7 @@ function connect() {
 function insert(key, value, table) {
     if(!connected) {
         console.log("MiBase не подключена!")
-        return
+        return;
     }
 
     if (typeof table === 'undefined') {
@@ -69,7 +69,7 @@ function insert(key, value, table) {
         filePath = path + '/' + table + '/' + table + '.sql';
         } else {
         console.log(`Таблица ${table} не найдена!`);
-        return
+        return;
         }
     }
 
@@ -88,7 +88,7 @@ function insert(key, value, table) {
 function select(key, table) {
     if(!connected) {
         console.log("MiBase не подключена!")
-        return
+        return;
     }
 
     if (typeof table === 'undefined') {
@@ -99,7 +99,7 @@ function select(key, table) {
         filePath = path + '/' + table + '/' + table + '.sql';
         } else {
         console.log(`Таблица ${table} не найдена!`);
-        return
+        return;
         }
     }
 
@@ -112,13 +112,13 @@ function select(key, table) {
     
     value = data[key]
     
-    return value;
+    console.log(value);
 };
 
 function remove(key, table) {
     if(!connected) {
         console.log("MiBase не подключена!")
-        return
+        return;
     }
 
     if (typeof table === 'undefined') {
@@ -129,7 +129,7 @@ function remove(key, table) {
         filePath = path + '/' + table + '/' + table + '.sql';
         } else {
         console.log(`Таблица ${table} не найдена!`);
-        return
+        return;
         }
     }
 
@@ -150,7 +150,7 @@ function remove(key, table) {
 function clearData(table) {
     if(!connected) {
         console.log("MiBase не подключена!")
-        return
+        return;
     }
 
     if (typeof table === 'undefined') {
@@ -161,7 +161,7 @@ function clearData(table) {
         filePath = path + '/' + table + '/' + table + '.sql';
         } else {
         console.log(`Таблица ${table} не найдена!`);
-        return
+        return;
         }
     }
 
@@ -173,7 +173,7 @@ function clearData(table) {
 function search(value, table) {
     if(!connected) {
         console.log("MiBase не подключена!")
-        return
+        return;
     }
 
     if (typeof table === 'undefined') {
@@ -184,7 +184,7 @@ function search(value, table) {
         filePath = path + '/' + table + '/' + table + '.sql';
         } else {
         console.log(`Таблица ${table} не найдена!`);
-        return
+        return;
         }
     }
 
@@ -195,19 +195,23 @@ function search(value, table) {
 
     let result;
     for (let key in data) {
-        if (data[key].includes(value)) {
+        if (data[key] === value) {
             result = key
         }
     }
 
-    console.log(result)
-    return result
+
+    if (typeof result === 'undefined') {
+        return;
+    } else {
+        console.log(result)
+    }
 }
 
 function close() {
     if(!connected) {
         console.log("MiBase не подключена!")
-        return
+        return;
     }
 
     console.log("MiBase отключена!");
