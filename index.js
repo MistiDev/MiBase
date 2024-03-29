@@ -119,7 +119,11 @@ function select(key, table) {
     
     value = data[key]
     
-    console.log(value);
+    if (type === 'default') {
+        console.log(value);
+    } else {
+        return value;
+    }
 };
 
 function remove(key, table) {
@@ -211,7 +215,11 @@ function search(value, table) {
     if (typeof result === 'undefined') {
         return;
     } else {
-        console.log(result)
+        if (type === 'default') {
+            console.log(result);
+        } else {
+            return result;
+        }
     }
 }
 
