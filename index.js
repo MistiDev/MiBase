@@ -4,14 +4,21 @@ const customBox = require('./boxes.js');
 let connected = false;
 
 if (!fs.existsSync("mibase-config.json")) {
-    fs.writeFileSync('./mibase-config.json', '{"path": "./MiBase","tables": ["main"]}');
+    fs.writeFileSync('./mibase-config.json', '{"type":"default", "path": "./MiBase", "tables": ["main"]}');
 }
 
 const configData = JSON.parse(fs.readFileSync('mibase-config.json'));
 const path = configData.path;
+const type = configData.type
 const tables = configData.tables;
 
 function connect() {
+    if(type !== "default" && type !== "discord") {
+        console.log(`Тип базы данных ${type} не существует в MiBase!`);
+        return;
+    }
+
+
     if(connected) {
         return;
     }
