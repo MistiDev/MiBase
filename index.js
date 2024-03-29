@@ -12,6 +12,11 @@ const path = configData.path;
 const tables = configData.tables;
 
 function connect() {
+    if(connected) {
+        return;
+    }
+
+
     if (!fs.existsSync(path)) {
         fs.mkdirSync(path);
         tables.forEach(name => {
