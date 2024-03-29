@@ -1,4 +1,5 @@
 const fs = require('file-system');
+const customBox = require('./boxes.js');
 
 let connected = false;
 
@@ -17,7 +18,16 @@ function connect() {
             fs.mkdirSync(path + '/' + name, { recursive: true })
             fs.writeFileSync(`${path}/${name}/${name}.sql`, '{}');
         });
-        console.log('MiBase подключена!');
+        customBox(
+            [
+              {
+                text: `Successfully connected database`,
+                textColor: "blue",
+              },
+            ],
+            "white",
+            { text: "       MiBase        ", textColor: "magenta" }
+            );
         connected = true;
     } else {
         tables.forEach(name => {
@@ -26,7 +36,16 @@ function connect() {
             fs.writeFileSync(`${path}/${name}/${name}.sql`, '{}');
             }
         });
-        console.log("MiBase подключена!");
+        customBox(
+            [
+              {
+                text: `Successfully connected database`,
+                textColor: "blue",
+              },
+            ],
+            "white",
+            { text: "       MiBase        ", textColor: "magenta" }
+            );
         connected = true;
     }
 };
