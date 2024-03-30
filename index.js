@@ -15,11 +15,6 @@ const tables = configData.tables;
 let varias = eval(`({})`)
 
 function variables(vars) {
-    if(!connected) {
-        console.log("MiBase не подключена!")
-        return;
-    }
-
     varias = eval((vars));
 }
 
