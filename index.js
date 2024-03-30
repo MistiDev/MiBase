@@ -4,13 +4,24 @@ const customBox = require('./boxes.js');
 let connected = false;
 
 if (!fs.existsSync("mibase-config.json")) {
-    fs.writeFileSync('./mibase-config.json', '{"type":"default", "path": "./MiBase", "tables": ["main"]}');
+    fs.writeFileSync('./mibase-config.json', '{\n"type":"default",\n"path": "./MiBase",\n"tables": ["main"]\n}');
 }
 
 const configData = JSON.parse(fs.readFileSync('mibase-config.json'));
 const path = configData.path;
-const type = configData.type
+const type = configData.type;
 const tables = configData.tables;
+
+let varias = eval(`({})`)
+
+function variables(vars) {
+    if(!connected) {
+        console.log("MiBase не подключена!")
+        return;
+    }
+
+    varias = eval((vars));
+}
 
 function connect() {
     if(type !== "default" && type !== "discord") {
@@ -48,6 +59,7 @@ function connect() {
             fs.writeFileSync(`${path}/${name}/${name}.sql`, '{}');
             }
         });
+
         customBox(
             [
               {
@@ -77,6 +89,15 @@ function insert(key, value, table) {
         } else {
         console.log(`Таблица ${table} не найдена!`);
         return;
+        }
+    }
+
+    if (!varias.hasOwnProperty(key)) {
+        if (type === 'default') {
+            console.log(`Переменной ${key} не существует!`);
+            return;
+        } else {
+            return `Переменной ${key} не существует!`;
         }
     }
 
@@ -110,15 +131,29 @@ function select(key, table) {
         }
     }
 
+    if (!varias.hasOwnProperty(key)) {
+        if (type === 'default') {
+            console.log(`Переменной ${key} не существует!`);
+            return;
+        } else {
+            return `Переменной ${key} не существует!`;
+        }
+    }
+
     data = {};
 
     if (fs.existsSync(filePath)) {
         const jsonData = fs.readFileSync(filePath);
         data = JSON.parse(jsonData);
     }
+
+    if (typeof data[key] === 'undefined') {
+        value = varias[key]
+    } else {
+        value = data[key]
+    }
     
-    value = data[key]
-    
+
     if (type === 'default') {
         console.log(value);
     } else {
@@ -233,4 +268,4 @@ function close() {
     connected = false;
 }
 
-module.exports = { connect, insert, select, remove, clearData, search, close };
+module.exports = { connect, insert, select, remove, clearData, search, close, variables };
