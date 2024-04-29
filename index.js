@@ -12,12 +12,6 @@ const path = configData.path;
 const type = configData.type;
 const tables = configData.tables;
 
-let varias = eval(`({})`)
-
-function variables(vars) {
-    varias = eval((vars));
-}
-
 function connect() {
     if(type !== "default" && type !== "discord") {
         console.log(`Тип базы данных ${type} не существует в MiBase!`);
@@ -87,15 +81,6 @@ function insert(key, value, table) {
         }
     }
 
-    if (!varias.hasOwnProperty(key)) {
-        if (type === 'default') {
-            console.log(`Переменной ${key} не существует!`);
-            return;
-        } else {
-            return `Переменной ${key} не существует!`;
-        }
-    }
-
     let data = {};
 
     if (fs.existsSync(filePath)) {
@@ -126,15 +111,6 @@ function select(key, table) {
         }
     }
 
-    if (!varias.hasOwnProperty(key)) {
-        if (type === 'default') {
-            console.log(`Переменной ${key} не существует!`);
-            return;
-        } else {
-            return `Переменной ${key} не существует!`;
-        }
-    }
-
     data = {};
 
     if (fs.existsSync(filePath)) {
@@ -143,9 +119,9 @@ function select(key, table) {
     }
 
     if (typeof data[key] === 'undefined') {
-        value = varias[key]
+        value = 'undefined';
     } else {
-        value = data[key]
+        value = data[key];
     }
     
 
@@ -259,8 +235,7 @@ function close() {
         return;
     }
 
-    console.log("MiBase отключена!");
     connected = false;
 }
 
-module.exports = { connect, insert, select, remove, clearData, search, close, variables };
+module.exports = { connect, insert, select, remove, clearData, search, close };
