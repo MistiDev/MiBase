@@ -13,7 +13,7 @@ const type = configData.type;
 const tables = configData.tables;
 
 function connect() {
-    if(type !== "default" && type !== "discord") {
+    if(type !== "default" && type !== "discord" && type !== 'sharding') {
         console.log(`Тип базы данных ${type} не существует в MiBase!`);
         return;
     }
@@ -26,6 +26,7 @@ function connect() {
 
     if (!fs.existsSync(path)) {
         fs.mkdirSync(path);
+        fs.mkdirSync(path + '/shards');
         tables.forEach(name => {
             fs.mkdirSync(path + '/' + name, { recursive: true })
             fs.writeFileSync(`${path}/${name}/${name}.sql`, '{}');
@@ -48,6 +49,10 @@ function connect() {
             fs.writeFileSync(`${path}/${name}/${name}.sql`, '{}');
             }
         });
+
+        if (!fs.existsSync(path + '/shards')) {
+            fs.mkdirSync(path + '/shards');
+        }
 
         customBox(
             [
@@ -99,15 +104,24 @@ function select(key, table) {
         return;
     }
 
-    if (typeof table === 'undefined') {
-        let tableToRead = tables[0];
-        filePath = path + '/' + `${tableToRead}/` + `${tableToRead}.sql`;
-    } else {
-        if (tables.indexOf(table)!==-1) {
-        filePath = path + '/' + table + '/' + table + '.sql';
+    if (type === 'sharding') {
+        if (!fs.existsSync(path + '/shards/' + table +'.sql')) {
+            console.log(`Блок ${table} не найден!`)
+            return;
         } else {
-        console.log(`Таблица ${table} не найдена!`);
-        return;
+            filePath = path + '/shards/' + table + '.sql';
+        }
+    } else {
+        if (typeof table === 'undefined') {
+            let tableToRead = tables[0];
+            filePath = path + '/' + `${tableToRead}/` + `${tableToRead}.sql`;
+        } else {
+            if (tables.indexOf(table)!==-1) {
+            filePath = path + '/' + table + '/' + table + '.sql';
+            } else {
+            console.log(`Таблица ${table} не найдена!`);
+            return;
+            }
         }
     }
 
@@ -125,10 +139,10 @@ function select(key, table) {
     }
     
 
-    if (type === 'default') {
-        console.log(value);
-    } else {
+    if (type === 'sharding' || type === 'discord') {
         return value;
+    } else {
+        console.log(value);
     }
 };
 
