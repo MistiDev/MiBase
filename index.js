@@ -4,7 +4,7 @@ const customBox = require('./boxes.js');
 let connected = false;
 
 if (!fs.existsSync("mibase-config.json")) {
-    fs.writeFileSync('./mibase-config.json', '{\n"type":"default", // default, discord, sharding\n"path": "./MiBase",\n"tables": ["main"]\n}');
+    fs.writeFileSync('./mibase-config.json', '{\n"type":"default",\n"path": "./MiBase",\n"tables": ["main"]\n}');
 }
 
 const configData = JSON.parse(fs.readFileSync('mibase-config.json'));
