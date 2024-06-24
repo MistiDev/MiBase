@@ -1,255 +1,78 @@
 const fs = require('file-system');
 const customBox = require('./boxes.js');
 
-let connected = false;
-
-if (!fs.existsSync("mibase-config.json")) {
-    fs.writeFileSync('./mibase-config.json', '{\n"type":"default",\n"path": "./MiBase",\n"tables": ["main"]\n}');
-}
-
-const configData = JSON.parse(fs.readFileSync('mibase-config.json'));
-const path = configData.path;
-const type = configData.type;
-const tables = configData.tables;
-
-function connect() {
-    if(type !== "default" && type !== "discord" && type !== 'sharding') {
-        console.log(`Тип базы данных ${type} не существует в MiBase!`);
-        return;
+class MiBase {
+    constructor(config) {
+        this.connected = false;
+        this.path = config.path || './MiBase';
+        this.tables = config.tables || ['main'];
+        this.init();
     }
 
-
-    if(connected) {
-        return;
-    }
-
-
-    if (!fs.existsSync(path)) {
-        fs.mkdirSync(path);
-        fs.mkdirSync(path + '/shards');
-        tables.forEach(name => {
-            fs.mkdirSync(path + '/' + name, { recursive: true })
-            fs.writeFileSync(`${path}/${name}/${name}.sql`, '{}');
-        });
-        customBox(
-            [
-              {
-                text: `Successfully connected database`,
-                textColor: "blue",
-              },
-            ],
-            "white",
-            { text: "       MiBase        ", textColor: "magenta" }
-            );
-        connected = true;
-    } else {
-        tables.forEach(name => {
-            if (!fs.existsSync(path + '/' + name)) {
-            fs.mkdirSync(path + '/' + name, { recursive: true })
-            fs.writeFileSync(`${path}/${name}/${name}.sql`, '{}');
-            }
-        });
-
-        if (!fs.existsSync(path + '/shards')) {
-            fs.mkdirSync(path + '/shards');
-        }
-
-        customBox(
-            [
-              {
-                text: `Successfully connected database`,
-                textColor: "blue",
-              },
-            ],
-            "white",
-            { text: "       MiBase        ", textColor: "magenta" }
-            );
-        connected = true;
-    }
-};
-
-function insert(key, value, table) {
-    if(!connected) {
-        console.log("MiBase не подключена!")
-        return;
-    }
-
-    if (typeof table === 'undefined') {
-        let tableToWrite = tables[0];
-        filePath = path + '/' + `${tableToWrite}/` + `${tableToWrite}.sql`;
-    } else {
-        if (tables.indexOf(table)!==-1) {
-        filePath = path + '/' + table + '/' + table + '.sql';
+    init() {
+        if (!fs.existsSync(this.path)) {
+            fs.mkdirSync(this.path);
+            this.tables.forEach(name => {
+                fs.writeFileSync(`${this.path}/${name}.db`, '{}');
+            });
         } else {
-        console.log(`Таблица ${table} не найдена!`);
-        return;
+            this.tables.forEach(name => {
+                if (!fs.existsSync(`${this.path}/${name}.db`)) {
+                    fs.writeFileSync(`${this.path}/${name}.db`, '{}');
+                }
+            });
         }
+
+        customBox(
+            [
+              {
+                text: `Successfully connected database`,
+                textColor: "blue",
+              },
+            ],
+            "white",
+            { text: "       MiBase        ", textColor: "magenta" }
+        );
+        this.connected = true
     }
 
-    let data = {};
-
-    if (fs.existsSync(filePath)) {
-        const jsonData = fs.readFileSync(filePath);
-        data = JSON.parse(jsonData);
-    }
-
-    data[key] = value.toString();
-    
-    fs.writeFileSync(filePath, JSON.stringify(data));
-};
-
-function select(key, table) {
-    if(!connected) {
-        console.log("MiBase не подключена!")
-        return;
-    }
-
-    if (type === 'sharding') {
-        if (!fs.existsSync(path + '/shards/' + table +'.sql')) {
-            console.log(`Блок ${table} не найден!`)
+    insert(key, value, name) {
+        if(!this.connected) {
+            console.log("MiBase is not initialized!")
             return;
-        } else {
-            filePath = path + '/shards/' + table + '.sql';
         }
-    } else {
-        if (typeof table === 'undefined') {
-            let tableToRead = tables[0];
-            filePath = path + '/' + `${tableToRead}/` + `${tableToRead}.sql`;
+
+        let filePath;
+
+        if (typeof name === 'undefined') {
+            let tableToWrite = this.tables[0];
+            filePath = `${this.path}/${tableToWrite}.db`;
         } else {
-            if (tables.indexOf(table)!==-1) {
-            filePath = path + '/' + table + '/' + table + '.sql';
+            if (this.tables.indexOf(name)!==-1) {
+                filePath = `${this.path}/${name}.db`;
             } else {
-            console.log(`Таблица ${table} не найдена!`);
-            return;
+                console.log(`The table ${name} not found!`);
+                return;
             }
         }
-    }
 
-    data = {};
+        let data = {};
 
-    if (fs.existsSync(filePath)) {
-        const jsonData = fs.readFileSync(filePath);
-        data = JSON.parse(jsonData);
-    }
-
-    if (typeof data[key] === 'undefined') {
-        value = 'undefined';
-    } else {
-        value = data[key];
-    }
-    
-
-    if (type === 'sharding' || type === 'discord') {
-        return value;
-    } else {
-        console.log(value);
-    }
-};
-
-function remove(key, table) {
-    if(!connected) {
-        console.log("MiBase не подключена!")
-        return;
-    }
-
-    if (typeof table === 'undefined') {
-        let tableToWrite = tables[0];
-        filePath = path + '/' + `${tableToWrite}/` + `${tableToWrite}.sql`;
-    } else {
-        if (tables.indexOf(table)!==-1) {
-        filePath = path + '/' + table + '/' + table + '.sql';
-        } else {
-        console.log(`Таблица ${table} не найдена!`);
-        return;
+        if (fs.existsSync(filePath)) {
+            const jsonData = fs.readFileSync(filePath);
+            data = JSON.parse(jsonData);
         }
-    }
 
-    data = {};
-
-    if (fs.existsSync(filePath)) {
-        const jsonData = fs.readFileSync(filePath);
-        data = JSON.parse(jsonData);
-    }
-
-    if(data.hasOwnProperty(key)) {
-        delete data[key]
-
+        data[key] = value.toString();
+        
         fs.writeFileSync(filePath, JSON.stringify(data));
     }
-}
 
-function clearData(table) {
-    if(!connected) {
-        console.log("MiBase не подключена!")
-        return;
-    }
-
-    if (typeof table === 'undefined') {
-        let tableToWrite = tables[0];
-        filePath = path + '/' + `${tableToWrite}/` + `${tableToWrite}.sql`;
-    } else {
-        if (tables.indexOf(table)!==-1) {
-        filePath = path + '/' + table + '/' + table + '.sql';
-        } else {
-        console.log(`Таблица ${table} не найдена!`);
-        return;
-        }
-    }
-
-    data = {};
-
-    fs.writeFileSync(filePath, JSON.stringify(data))
-}
-
-function search(value, table) {
-    if(!connected) {
-        console.log("MiBase не подключена!")
-        return;
-    }
-
-    if (typeof table === 'undefined') {
-        let tableToRead = tables[0];
-        filePath = path + '/' + `${tableToRead}/` + `${tableToRead}.sql`;
-    } else {
-        if (tables.indexOf(table)!==-1) {
-        filePath = path + '/' + table + '/' + table + '.sql';
-        } else {
-        console.log(`Таблица ${table} не найдена!`);
-        return;
-        }
-    }
-
-    if (fs.existsSync(filePath)) {
-        const jsonData = fs.readFileSync(filePath);
-        data = JSON.parse(jsonData);
-    }
-
-    let result;
-    for (let key in data) {
-        if (data[key] === value) {
-            result = key
-        }
-    }
-
-
-    if (typeof result === 'undefined') {
-        return;
-    } else {
-        if (type === 'default') {
-            console.log(result);
-        } else {
-            return result;
+    createTable(name) {
+        if(!fs.existsSync(`${this.path}/${name}.db`)) {
+            fs.writeFileSync(`${this.path}/${name}.db`, '{}')
         }
     }
 }
 
-function close() {
-    if(!connected) {
-        console.log("MiBase не подключена!")
-        return;
-    }
-
-    connected = false;
-}
-
-module.exports = { connect, insert, select, remove, clearData, search, close };
+module.exports = MiBase;
