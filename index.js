@@ -5,22 +5,18 @@ class MiBase {
     constructor(config) {
         this.connected = false;
         this.path = config.path || './MiBase';
-        this.tables = config.tables || ['main'];
+        this.tables = fs.readdirSync(this.path).map(table => table.replace('.db', ''));
+        this.debug = config.debug || false;
         this.init();
     }
 
     init() {
         if (!fs.existsSync(this.path)) {
             fs.mkdirSync(this.path);
-            this.tables.forEach(name => {
-                fs.writeFileSync(`${this.path}/${name}.db`, '{}');
-            });
-        } else {
-            this.tables.forEach(name => {
-                if (!fs.existsSync(`${this.path}/${name}.db`)) {
-                    fs.writeFileSync(`${this.path}/${name}.db`, '{}');
-                }
-            });
+        }
+
+        if (this.tables.length === 0) {
+            this.createTable('main');
         }
 
         customBox(
@@ -36,178 +32,124 @@ class MiBase {
         this.connected = true
     }
 
-    insert(key, value, name) {
+    insertData(key, value, table) {
         if(!this.connected) {
-            console.log("MiBase is not initialized!")
+            throw new Error('MiBase is not initialized!')
+        }
+
+        const filePath = typeof table === 'undefined' ? `${this.path}/${this.tables[0]}.db` : `${this.path}/${table}.db`;
+
+        if (!fs.existsSync(filePath)) {
+            console.log(`The table ${table} not found!`);
             return;
         }
 
-        let filePath;
+        let data = JSON.parse(fs.readFileSync(filePath));
 
-        if (typeof name === 'undefined') {
-            let tableToWrite = this.tables[0];
-            filePath = `${this.path}/${tableToWrite}.db`;
-        } else {
-            if (this.tables.indexOf(name)!==-1) {
-                filePath = `${this.path}/${name}.db`;
-            } else {
-                console.log(`The table ${name} not found!`);
-                return;
-            }
-        }
-
-        let data = {};
-
-        if (fs.existsSync(filePath)) {
-            const jsonData = fs.readFileSync(filePath);
-            data = JSON.parse(jsonData);
-        }
-
-        data[key] = value.toString();
-        
+        data[key] = typeof value === 'number' ? value : value === null ? null : value === undefined ? undefined : value === true ? true : value === false ? false : value.toString();
         fs.writeFileSync(filePath, JSON.stringify(data));
     }
 
     createTable(name) {
         if(!fs.existsSync(`${this.path}/${name}.db`)) {
             fs.writeFileSync(`${this.path}/${name}.db`, '{}')
+            this.tables = fs.readdirSync(this.path)
+        } else {
+            console.log(`The table ${name} already exists!`);
+            return;
         }
     }
-
+    
     deleteTable(name) {
         if(fs.existsSync(`${this.path}/${name}.db`)) {
             fs.unlinkSync(`${this.path}/${name}.db`)
+            this.tables = fs.readdirSync(this.path)
+        } else {
+            console.log(`The table ${name} not found!`);
+            return;
         }
     }
 
-    select(key, table) {
+    getData(key, table) {
         if(!this.connected) {
-            console.log("MiBase is not initialized!")
+            throw new Error('MiBase is not initialized!')
+        }
+
+        const filePath = `${this.path}/${table ? table : this.tables[0]}.db`;
+
+        console.log(filePath)
+
+        if (!fs.existsSync(filePath)) {
+            console.log(`The table ${table} not found!`);
             return;
         }
 
-        let filePath;
-
-        if (typeof table === 'undefined') {
-            let tableToRead = this.tables[0];
-            filePath = `${this.path}/${tableToRead}.db`;
-        } else {
-            if (this.tables.indexOf(table)!==-1) {
-                filePath = `${this.path}/${table}.db`;
-            } else {
-                console.log(`The table ${table} not found!`);
-                return;
-            }
-        }
-
-        let data = {};
-
-        if (fs.existsSync(filePath)) {
-            const jsonData = fs.readFileSync(filePath);
-            data = JSON.parse(jsonData);
-        }
-
+        const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
         return data[key];
-    };
+    }
 
     clearData(table) {
-        if(!this.connected) {
-            console.log("MiBase is not initialized!")
+        if (!this.connected) {
+            throw new Error('MiBase is not initialized!');
+        }
+
+        const filePath = `${this.path}/${table ? table : this.tables[0]}.db`;
+
+        if (!fs.existsSync(filePath)) {
+            console.log(`The table ${table} not found!`);
             return;
         }
 
-        let filePath;
-
-        if (typeof table === 'undefined') {
-            let tableToWrite = this.tables[0];
-            filePath = `${this.path}/${tableToWrite}.db`;
-        } else {
-            if (this.tables.indexOf(table)!==-1) {
-            filePath = `${this.path}/${table}.db`;
-            } else {
-            console.log(`The table ${table} not found!`);  
-            return;
-            }
-        }
-
-        fs.writeFileSync(filePath, JSON.stringify({}))
+        fs.writeFileSync(filePath, '{}');
     }
 
-    remove(key, table) {
+    removeKey(key, table) {
         if(!this.connected) {
-            console.log("MiBase is not initialized!")
-            return;
+            throw new Error('MiBase is not initialized!');
         }
-    
-        let filePath;
 
-        if (typeof table === 'undefined') {
-            let tableToWrite = this.tables[0];
-            filePath = `${this.path}/${tableToWrite}.db`;
-        } else {
-            if (this.tables.indexOf(table)!==-1) {
-            filePath = `${this.path}/${table}.db`;  
-            } else {
-            console.log(`The table ${table} not found!`); 
+        const filePath = `${this.path}/${table || this.tables[0]}.db`;
+
+        if (!fs.existsSync(filePath)) {
+            console.log(`The table ${table} not found!`);
             return;
-            }
         }
-    
-        data = {};
-    
-        if (fs.existsSync(filePath)) {
-            const jsonData = fs.readFileSync(filePath);
-            data = JSON.parse(jsonData);
-        }
-    
-        if(data.hasOwnProperty(key)) {
+
+        const data = JSON.parse(fs.readFileSync(filePath));
+
+        if (data.hasOwnProperty(key)) {
             delete data[key];
             fs.writeFileSync(filePath, JSON.stringify(data));
         }
     }
 
-    searchKey(value, table) {
-        if(!this.connected) {
-            console.log("MiBase is not initialized!")
+    searchKey(value, index, table) {
+        if (!this.connected) {
+            throw new Error('MiBase is not initialized!');
+        }
+
+        const filePath = `${this.path}/${table || this.tables[0]}.db`;
+
+        if (!fs.existsSync(filePath)) {
             return;
         }
-    
-        let filePath;
-        let keys = [];
 
-        if (typeof table === 'undefined') {
-            let tableToRead = this.tables[0];
-            filePath = `${this.path}/${tableToRead}.db`;
-        } else {
-            if (this.tables.indexOf(table)!==-1) {
-            filePath = `${this.path}/${table}.db`;
-            } else {
-            console.log(`The table ${table} not found!`);
-            return;
-            }
-        }
-    
-        let data = {};
+        const data = JSON.parse(fs.readFileSync(filePath));
+        const keys = Object.keys(data).filter(key => data[key] === value);
 
-        if (fs.existsSync(filePath)) {
-            const jsonData = fs.readFileSync(filePath);
-            data = JSON.parse(jsonData);
+        if (keys.length === 0) {
+            return undefined;
         }
-    
-        for (let key in data) {
-            if (data[key] == value) {
-                keys.push(key)
-            }
-        }
-        
-        
+
         if (keys.length === 1) {
             return keys[0];
-        } else if (keys.length > 1) {
-            return keys;
-        } else {
-            return null
         }
+
+        if (parseInt(index) < keys.length) {
+            return keys[index];
+        }
+
+        return keys;
     }
 }
 
