@@ -56,7 +56,7 @@ class MiBase {
         if(!fs.existsSync(`${this.path}/${name}.db`)) {
             const jsonData = typeof data === 'object' ? data : JSON.parse(data);
             const stringData = JSON.stringify(jsonData);
-            fs.writeFileSync(filePath, stringData);
+            fs.writeFileSync(`${this.path}/${name}.db`, stringData);
             this.tables = fs.readdirSync(this.path);
         } else {
             console.log(`The table ${name} already exists!`);
