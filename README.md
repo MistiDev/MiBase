@@ -7,13 +7,15 @@
 # Install
 
 ```
-npm i https://github.com/MistiDev/MiBase
+npm i mibase
 ```
 
 # Setup
 
 ```js
-const db = require("./index.js")
-
-db.connect()
+const MiBase = require("mibase")
+const db = new MiBase({
+  path: './MiBase',
+  debug: false
+})
 ```

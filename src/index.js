@@ -1,5 +1,5 @@
 const fs = require('file-system');
-const customBox = require('./boxes.js');
+const customBox = require('./src/boxes.js');
 
 class MiBase {
     constructor(config) {

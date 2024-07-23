@@ -5,7 +5,14 @@
     "author": "Mist?",
     "repository": "https://github.com/MistiDev/MiBase",
     "license": "ISC",
-    "description": "",
+    "keywords": [
+        "database",
+        "mibase",
+        "db",
+        "json",
+        "javascript"
+    ],
+    "description": "Database for easy use.",
     "dependencies": {
         "chalk": "^4.1.2",
         "file-system": "^2.2.2"
