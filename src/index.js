@@ -1,11 +1,11 @@
 const fs = require('file-system');
-const customBox = require('./src/boxes.js');
+const customBox = require('./boxes.js');
 
 class MiBase {
     constructor(config) {
         this.connected = false;
         this.path = config.path || './MiBase';
-        this.tables = fs.readdirSync(this.path).map(table => table.replace('.db', ''));
+        this.tables = [];
         this.debug = config.debug || false;
         this.init();
     }
@@ -19,6 +19,8 @@ class MiBase {
             this.createTable('main');
         }
 
+        this.tables = fs.readdirSync(this.path).map(table => table.replace('.db', ''));
+        
         customBox(
             [
               {
@@ -50,9 +52,9 @@ class MiBase {
         fs.writeFileSync(filePath, JSON.stringify(data));
     }
 
-    createTable(name) {
+    createTable(name, data) {
         if(!fs.existsSync(`${this.path}/${name}.db`)) {
-            fs.writeFileSync(`${this.path}/${name}.db`, '{}')
+            fs.writeFileSync(`${this.path}/${name}.db`, typeof data === 'object' ? JSON.stringify(data) : '{}');
             this.tables = fs.readdirSync(this.path)
         } else {
             console.log(`The table ${name} already exists!`);
