@@ -15,6 +15,10 @@ class MiBase {
             fs.mkdirSync(this.path);
         }
 
+        if (this.tables.length === 0) {
+            this.createTable('main', {});
+        }
+
         this.tables = fs.readdirSync(this.path).map(table => table.replace('.db', ''));
         
         customBox(
