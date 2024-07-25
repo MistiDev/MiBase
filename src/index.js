@@ -4,7 +4,7 @@ const customBox = require('./boxes.js');
 class MiBase {
     constructor(config) {
         this.connected = false;
-        this.path = config.path || './MiBase';
+        this.path = config.path.replace('/\/$/', '') || './MiBase';
         this.tables = [];
         this.debug = config.debug || false;
         this.init();
@@ -13,10 +13,6 @@ class MiBase {
     init() {
         if (!fs.existsSync(this.path)) {
             fs.mkdirSync(this.path);
-        }
-
-        if (this.tables.length === 0) {
-            this.createTable('main');
         }
 
         this.tables = fs.readdirSync(this.path).map(table => table.replace('.db', ''));
@@ -48,20 +44,22 @@ class MiBase {
 
         let data = JSON.parse(fs.readFileSync(filePath));
 
-        data[key] = typeof value === 'number' ? value : value === null ? null : value === undefined ? undefined : value === true ? true : value === false ? false : value.toString();
+        data[key] = typeof value === 'object' ? value : typeof value === 'number' ? value : value === null ? null : value === undefined ? undefined : value === true ? true : value === false ? false : value.toString();
+
         fs.writeFileSync(filePath, JSON.stringify(data));
     }
-
-    createTable(name) {
+    
+    createTable(name, data) {
         if(!fs.existsSync(`${this.path}/${name}.db`)) {
-            fs.writeFileSync(`${this.path}/${name}.db`);
+            const d = typeof data === 'object' ? data : {};
+            fs.writeFileSync(`${this.path}/${name}.db`, JSON.stringify(d));
             this.tables = fs.readdirSync(this.path);
         } else {
             console.log(`The table ${name} already exists!`);
             return;
         }
     }
-    
+
     deleteTable(name) {
         if(fs.existsSync(`${this.path}/${name}.db`)) {
             fs.unlinkSync(`${this.path}/${name}.db`)
