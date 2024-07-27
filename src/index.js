@@ -15,23 +15,32 @@ class MiBase {
             fs.mkdirSync(this.path);
         }
 
+        const files = fs.readdirSync(this.path);
+        this.tables = files.filter(file => file.endsWith('.db')).map(file => {
+            const filePath = `${this.path}/${file}`;
+            const content = fs.readFileSync(filePath, 'utf8');
+            try {
+                JSON.parse(content);
+                return file.replace('.db', '');
+            } catch (error) {}
+            return null;
+        }).filter(Boolean);
+
         if (this.tables.length === 0) {
             this.createTable('main', {});
         }
 
-        this.tables = fs.readdirSync(this.path).map(table => table.replace('.db', ''));
-        
         customBox(
             [
-              {
-                text: `Successfully connected database`,
-                textColor: "blue",
-              },
+                {
+                    text: `Successfully connected database`,
+                    textColor: "blue",
+                },
             ],
             "white",
             { text: "       MiBase        ", textColor: "magenta" }
         );
-        this.connected = true
+        this.connected = true;
     }
 
     insertData(key, value, table) {
@@ -53,6 +62,10 @@ class MiBase {
         fs.writeFileSync(filePath, JSON.stringify(data));
     }
     
+    getTables() {
+        return this.tables;
+    }
+
     createTable(name, data) {
         if(!fs.existsSync(`${this.path}/${name}.db`)) {
             const d = typeof data === 'object' ? data : {};
