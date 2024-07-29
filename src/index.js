@@ -4,7 +4,7 @@ const customBox = require('./boxes.js');
 class MiBase {
     constructor(config) {
         this.connected = false;
-        this.path = config.path.replace('/\/$/', '') || './MiBase';
+        this.path = (typeof config.path != 'undefined') ? config.path.replace('/\/$/', '') : './MiBase';
         this.tables = [];
         this.debug = config.debug || false;
         this.init();
@@ -94,15 +94,24 @@ class MiBase {
 
         const filePath = `${this.path}/${table ? table : this.tables[0]}.db`;
 
-        console.log(filePath)
-
         if (!fs.existsSync(filePath)) {
             console.log(`The table ${table} not found!`);
             return;
         }
 
         const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-        return data[key];
+        const keys = key.split('.');
+        let result = data;
+
+        for (const keyt of keys) {
+            if (result[keyt] !== undefined) {
+                result = result[keyt];
+            } else {
+                result = undefined
+            }
+        }
+
+        return result;
     }
 
     clearData(table) {
